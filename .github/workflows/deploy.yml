@@ -16,7 +16,7 @@ jobs:
     - name: Set up PHP and Composer
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'  # adjust to your PHP version
+        php-version: '8.2'  # Laravel 12 and your lock file requires PHP 8.2+
         extensions: mbstring, bcmath, xml, curl, mysql
         tools: composer
 
@@ -25,7 +25,6 @@ jobs:
 
     - name: Prepare deployment directory
       run: |
-        # Remove any files that shouldn't be uploaded
         rm -rf tests
         rm -rf .github
         rm -rf node_modules

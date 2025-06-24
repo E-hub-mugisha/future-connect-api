@@ -1,4 +1,4 @@
-name: Deploy Laravel to cPanel via SSH
+name: Deploy Laravel via FTP
 
 on:
   push:
@@ -6,30 +6,51 @@ on:
       - main
 
 jobs:
-  deploy:
+  ftp-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p ${{ secrets.SSH_PORT || '22' }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+    - name: Set up PHP and Composer
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'  # adjust to your PHP version
+        extensions: mbstring, bcmath, xml, curl, mysql
+        tools: composer
 
-    - name: Deploy to cPanel server
+    - name: Install Composer dependencies
+      run: composer install --no-dev --optimize-autoloader
+
+    - name: Prepare deployment directory
       run: |
-        ssh -p ${{ secrets.SSH_PORT || '22' }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd public_html/future-connect-api || exit 1
-          git pull origin main
-          composer install --no-dev --optimize-autoloader
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          chown -R $USER:$USER .
-          find storage bootstrap/cache -type d -exec chmod 775 {} \;
-          find storage bootstrap/cache -type f -exec chmod 664 {} \;
-        EOF
+        # Remove any files that shouldn't be uploaded
+        rm -rf tests
+        rm -rf .github
+        rm -rf node_modules
+        rm -f composer.lock composer.json
+
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT }}
+        local-dir: ./
+        server-dir: public_html/future-connect-api
+        exclude: |
+          .git*
+          node_modules
+          tests
+          .github
+          composer.json
+          composer.lock
+          .env
+          storage/debugbar
+          storage/*.key
+          storage/framework/cache/data
+          storage/framework/sessions
+          storage/framework/views
+          storage/logs

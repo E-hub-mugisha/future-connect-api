@@ -38,7 +38,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         port: ${{ secrets.FTP_PORT }}
         local-dir: ./
-        server-dir: public_html/future-connect-api
+        server-dir: public_html/future-connect-api/
         exclude: |
           .git*
           node_modules

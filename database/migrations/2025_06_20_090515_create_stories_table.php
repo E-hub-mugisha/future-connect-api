@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('slug')->unique(); // URL-friendly version of the title
             $table->string('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('tags')->nullable(); // comma-separated tags
-            $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->enum('status', ['draft', 'published','archived'])->default('draft');
             $table->timestamps();
         });
     }

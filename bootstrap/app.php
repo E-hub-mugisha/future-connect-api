@@ -12,8 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->statefulApi();  // Adds EnsureFrontendRequestsAreStateful and other relevant middleware
+
+        // If you want to manually add specific middleware globally, do:
+        // $middleware->append(\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
     })
+    
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

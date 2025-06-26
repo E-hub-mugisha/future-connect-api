@@ -7,12 +7,15 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TalentController;
 use App\Http\Controllers\users\HomeController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/talents/{id}', [HomeController::class, 'show']);
 Route::get('/talent/skills/{id}', [App\Http\Controllers\users\HomeController::class, 'TalentSkillDetails']);
 Route::post('/skills/{id}/reviews', [App\Http\Controllers\users\HomeController::class, 'storeReview']);
+Route::get('/story-details/{slug}', [App\Http\Controllers\users\HomeController::class, 'storyDetails']);
 
+Route::post('/stories/comments', [App\Http\Controllers\users\HomeController::class, 'storeStoryComment']);
 
 Route::apiResource('talents', AdminTalentController::class);
 Route::put('/talents/{id}/status', [AdminTalentController::class, 'updateStatus']);
@@ -23,10 +26,10 @@ Route::apiResource('categories', AdminCategoryController::class);
 Route::apiResource('stories', \App\Http\Controllers\Admin\AdminStoryController::class);
 Route::apiResource('skills', \App\Http\Controllers\Admin\AdminSkillController::class);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/admin/announcements', [AdminAnnouncementController::class, 'index']);
-    Route::post('/admin/announcements', [AdminAnnouncementController::class, 'store']);
-    Route::get('/admin/announcements/{id}', [AdminAnnouncementController::class, 'show']);
-    Route::put('/admin/announcements/{id}', [AdminAnnouncementController::class, 'update']);
-    Route::delete('/admin/announcements/{id}', [AdminAnnouncementController::class, 'destroy']);
-});
+
+Route::resource('announcements', AdminAnnouncementController::class);
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+

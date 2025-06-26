@@ -8,6 +8,8 @@ use App\Models\Talent;
 use App\Models\Category;
 use App\Models\Skill;
 use App\Models\SkillReview;
+use App\Models\Story;
+use App\Models\StoryComment;
 
 class HomeController extends Controller
 {
@@ -45,6 +47,20 @@ class HomeController extends Controller
 
         return response()->json(['message' => 'Review submitted successfully', 'review' => $review]);
     }
+    // Store a new comment for a story
+    public function storeStoryComment(Request $request)
+    {
+        $data = $request->validate([
+            'name'    => 'required|string|max:100',
+            'email'   => 'required|email',
+            'comment' => 'required|string',
+            'story_id' => 'required|exists:stories,id',
+        ]);
+
+        $comment = StoryComment::create($data);
+
+        return response()->json($comment, 201);
+    }
     public function storeTalent(Request $request)
     {
         $request->validate([
@@ -62,4 +78,10 @@ class HomeController extends Controller
         $talent = Talent::create($request->all());
         return response()->json($talent, 201);
     }
+    public function storyDetails($slug)
+    {
+        $story = \App\Models\Story::where('slug', $slug)->with('comments')->firstOrFail();
+        return response()->json($story);
+    }
+    
 }

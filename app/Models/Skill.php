@@ -28,8 +28,7 @@ class Skill extends Model
         return $this->belongsTo(Category::class);
     }
     public function reviews()
-{
-    return $this->hasMany(SkillReview::class);
-}
-
+    {
+        return $this->hasMany(SkillReview::class);
+    }
 }

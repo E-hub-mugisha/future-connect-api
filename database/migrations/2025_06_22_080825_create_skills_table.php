@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-           $table->foreignId('talent_id')->constrained('talents')->onDelete('cascade');
-           $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('talent_id')->constrained('talents')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('tags')->nullable(); // comma-separated tags
-            $table->enum('status', ['draft', 'published'])->default('draft');
-            $table->enum('level', ['beginner', 'intermediate', 'advanced'])->default('beginner');
+            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->enum('level', ['Beginner', 'Intermediate', 'Advanced', 'Expert'])->default('beginner');
             $table->timestamps();
         });
     }

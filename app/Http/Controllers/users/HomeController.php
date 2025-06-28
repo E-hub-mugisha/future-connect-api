@@ -10,22 +10,38 @@ use App\Models\Skill;
 use App\Models\SkillReview;
 use App\Models\Story;
 use App\Models\StoryComment;
+use App\Models\Testimonial;
 
 class HomeController extends Controller
 {
     public function index()
     {
         return response()->json([
-            'talents' => Talent::all(),
+            'talents' => Talent::with('talent'),
             'categories' => Category::all(),
             'stories' => \App\Models\Story::all(),
-            'skills' => \App\Models\Skill::all(),
+            'skills' => \App\Models\Skill::with('talent'),
+            'testimonials' => \App\Models\Testimonial::with('talent')->inRandomOrder()->take(2)->get(),
         ]);
     }
     public function show($id)
     {
-        $talent = Talent::findOrFail($id);
+        $talent = Talent::with(['skills', 'stories'])->findOrFail($id);
         return response()->json($talent);
+    }
+    public function getTalentByCategory($slug)
+    {
+        // Find the category by slug or fail
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        // Fetch talents with related talent
+        $talents = Talent::where('category_id', $category->id)
+            ->get();
+
+        return response()->json([
+            'categoryName' => $category->name,
+            'talents' => $talents,
+        ]);
     }
     public function TalentSkillDetails($id)
     {
@@ -83,5 +99,67 @@ class HomeController extends Controller
         $story = \App\Models\Story::where('slug', $slug)->with('comments')->firstOrFail();
         return response()->json($story);
     }
-    
+
+    public function random()
+    {
+        return Testimonial::with('talent')->inRandomOrder()->take(2)->get();
+    }
+
+    public function getByCategory($slug)
+    {
+        // Find the category by slug or fail
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        // Fetch skills with related talent
+        $skills = Skill::with('talent')
+            ->where('category_id', $category->id)
+            ->get();
+
+        return response()->json([
+            'categoryName' => $category->name,
+            'skills' => $skills,
+        ]);
+    }
+    public function getStoryByCategory($slug)
+    {
+        // Find the category by slug or fail
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        // Fetch stories with related talent
+        $stories = Story::where('category_id', $category->id)
+            ->get();
+
+        return response()->json([
+            'categoryName' => $category->name,
+            'stories' => $stories,
+        ]);
+    }
+    public function skillDetails($slug)
+    {
+        $skill = \App\Models\Skill::where('slug', $slug)->firstOrFail();
+        return response()->json($skill);
+    }
+    public function relatedSkills($categoryId)
+    {
+        $excludeId = request()->query('exclude');
+
+        $query = Skill::with(['category', 'talent'])
+            ->where('category_id', $categoryId);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $skills = $query->latest()->take(6)->get();
+
+        return response()->json([
+            'skills' => $skills
+        ]);
+    }
+    public function withTalentCount()
+    {
+        $categories = Category::withCount('talents')->get();
+
+        return response()->json($categories);
+    }
 }

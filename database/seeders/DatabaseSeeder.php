@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             StorySeeder::class,
             SkillSeeder::class,
             SkillReviewSeeder::class,
+            TestimonialSeeder::class
         ]);
     }
 }
